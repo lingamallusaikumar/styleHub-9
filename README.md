@@ -150,4 +150,4 @@ npm run build
 
 ## License
 
-StyleHub Luxury E-Commerce Framework © 2026. All rights reserved.
+Proprietary (UNLICENSED). All rights reserved. StyleHub Luxury E-Commerce Framework © 2026.

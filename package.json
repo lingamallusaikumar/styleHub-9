@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "StyleHub Enterprise Full-Stack E-Commerce Platform",
   "main": "main.py",
+  "private": true,
   "scripts": {
     "start": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend run build",
@@ -19,5 +20,5 @@
     "rest-api"
   ],
   "author": "StyleHub Architecture Team",
-  "license": "MIT"
+  "license": "UNLICENSED"
 }
