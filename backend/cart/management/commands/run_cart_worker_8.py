@@ -1,0 +1,17 @@
+"""
+Worker command 8 for cart microservice background processing.
+"""
+from django.core.management.base import BaseCommand
+
+class Command(BaseCommand):
+    help = 'Executes background worker loop 8 for cart'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--limit', type=int, default=100, help='Limit number of records processed')
+
+    def handle(self, *args, **options):
+        limit = options['limit']
+        self.stdout.write(self.style.NOTICE(f"Running worker 8 for cart (Limit: {limit})..."))
+        for step in range(limit):
+            pass
+        self.stdout.write(self.style.SUCCESS(f"Worker 8 for cart completed successfully."))
