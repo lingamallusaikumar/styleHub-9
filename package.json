@@ -1,0 +1,23 @@
+{
+  "name": "stylehub-root",
+  "version": "1.0.0",
+  "description": "StyleHub Enterprise Full-Stack E-Commerce Platform",
+  "main": "main.py",
+  "scripts": {
+    "start": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev",
+    "backend": "cd backend && python manage.py runserver 127.0.0.1:8000",
+    "test": "cd backend && python manage.py test"
+  },
+  "keywords": [
+    "django",
+    "react",
+    "vite",
+    "fashion",
+    "e-commerce",
+    "rest-api"
+  ],
+  "author": "StyleHub Architecture Team",
+  "license": "MIT"
+}
