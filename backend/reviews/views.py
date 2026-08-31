@@ -4,13 +4,21 @@ from .models import Review, ReviewHelpfulVote
 from .serializers import ReviewSerializer
 from catalog.models import Product
 
+class AllReviewsListView(generics.ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.AllowAny]
+    queryset = Review.objects.select_related('user', 'product').prefetch_related('images').all()
+
+
 class ProductReviewListView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         product_slug = self.kwargs.get('product_slug')
-        return Review.objects.filter(product__slug=product_slug).select_related('user').prefetch_related('images')
+        if product_slug:
+            return Review.objects.filter(product__slug=product_slug).select_related('user').prefetch_related('images')
+        return Review.objects.all()
 
     def perform_create(self, serializer):
         product_slug = self.kwargs.get('product_slug')

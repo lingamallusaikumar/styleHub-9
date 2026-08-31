@@ -17,8 +17,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isWishlisted,
   onToggleWishlist,
 }) => {
-  const primaryImg = product.images.find(img => img.is_primary)?.image_url || product.images[0]?.image_url;
-  const brandName = typeof product.brand === 'string' ? product.brand : product.brand.name;
+  const images = product?.images || [];
+  const primaryImg = (images.length > 0 ? (images.find(img => img?.is_primary)?.image_url || images[0]?.image_url) : null)
+    || (product as any)?.primary_image
+    || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&auto=format&fit=crop';
+
+  const brandName = typeof product?.brand === 'string'
+    ? product.brand
+    : (product?.brand?.name || (product as any)?.brand_name || 'StyleHub');
+
+  const price = Number(product?.base_price || (product as any)?.current_price || 0);
+  const rating = Number(product?.avg_rating || (product as any)?.rating_avg || 4.5);
+  const reviews = Number(product?.review_count || (product as any)?.rating_count || 0);
+  const views = Number(product?.view_count || (product as any)?.views_count || 0);
 
   return (
     <div className="glass-card group relative flex flex-col h-full overflow-hidden border border-[var(--border-subtle)]">
@@ -27,18 +38,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--bg-surface-elevated)] cursor-pointer" onClick={() => onQuickView(product)}>
         <img
           src={primaryImg}
-          alt={product.title}
+          alt={product?.title || 'Fashion Item'}
           className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
         />
 
         {/* Top Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-          {product.discount_percentage && (
+          {Boolean(product?.discount_percentage) && (
             <span className="badge-gold font-extrabold text-[10px]">
               -{product.discount_percentage}% OFF
             </span>
           )}
-          {product.is_featured && (
+          {Boolean(product?.is_featured) && (
             <span className="badge-dark text-[10px] font-bold">
               FEATURED
             </span>
@@ -94,8 +105,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <span>{brandName}</span>
             <div className="flex items-center gap-1 text-[var(--accent-gold)]">
               <Star className="w-3 h-3 fill-current" />
-              <span>{product.avg_rating}</span>
-              <span className="text-[var(--text-muted)]">({product.review_count})</span>
+              <span>{rating.toFixed(1)}</span>
+              <span className="text-[var(--text-muted)]">({reviews})</span>
             </div>
           </div>
 
@@ -103,7 +114,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             onClick={() => onQuickView(product)}
             className="font-bold text-sm text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors cursor-pointer line-clamp-1 mt-1"
           >
-            {product.title}
+            {product?.title || 'Untitled Item'}
           </h3>
         </div>
 
@@ -111,17 +122,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)]">
           <div className="flex items-baseline gap-2">
             <span className="font-extrabold text-base text-[var(--text-primary)] font-['Outfit']">
-              ${product.base_price.toFixed(2)}
+              ${price.toFixed(2)}
             </span>
-            {product.discount_percentage && (
+            {Boolean(product?.discount_percentage) && (
               <span className="text-xs text-[var(--text-muted)] line-through">
-                ${(product.base_price * (1 + product.discount_percentage / 100)).toFixed(2)}
+                ${(price * (1 + (product.discount_percentage || 0) / 100)).toFixed(2)}
               </span>
             )}
           </div>
 
           <span className="text-[10px] text-[var(--text-muted)]">
-            {product.view_count} views
+            {views} views
           </span>
         </div>
       </div>

@@ -3,6 +3,9 @@
 import os
 import sys
 
+# Ensure backend root is on Python module search path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stylehub.settings')

@@ -45,14 +45,41 @@ export class ApiService {
     try {
       const url = new URL(`${BASE_URL}/catalog/products/`);
       if (params?.category && params.category !== 'all') url.searchParams.append('category', params.category);
-      if (params?.search) url.searchParams.append('search', params.search);
-      if (params?.sort) url.searchParams.append('ordering', params.sort);
+      if (params?.search) url.searchParams.append('q', params.search);
+      if (params?.sort) url.searchParams.append('sort', params.sort);
 
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error('API Error');
       const data = await res.json();
-      return data.results || data;
-    } catch {
+      const rawList = data.results || (Array.isArray(data) ? data : []);
+
+      return rawList.map((item: any) => {
+        const primaryImg = item.primary_image || (item.images && item.images.length > 0 ? (item.images.find((img: any) => img.is_primary)?.image_url || item.images[0]?.image_url) : null) || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&auto=format&fit=crop';
+        const brandName = item.brand_name || (typeof item.brand === 'object' ? item.brand?.name : typeof item.brand === 'string' ? item.brand : 'StyleHub Atelier');
+        const price = Number(item.base_price || item.current_price || 190);
+
+        return {
+          id: item.id,
+          title: item.title || 'Luxury Fashion Item',
+          slug: item.slug || `product-${item.id}`,
+          description: item.description || 'Crafted with premium Italian fabric and timeless elegance.',
+          base_price: price,
+          category: typeof item.category === 'object' ? item.category?.slug : (item.category_name || item.category || 'outerwear'),
+          brand: brandName,
+          images: Array.isArray(item.images) && item.images.length > 0 ? item.images : [{ id: 1, image_url: primaryImg, is_primary: true }],
+          variants: Array.isArray(item.variants) && item.variants.length > 0 ? item.variants : [
+            { id: item.id * 100 + 1, sku: `SKU-${item.id}-BLK`, color_name: 'Midnight Black', size: 'M', stock_quantity: 10 },
+            { id: item.id * 100 + 2, sku: `SKU-${item.id}-CAM`, color_name: 'Camel Gold', size: 'L', stock_quantity: 8 }
+          ],
+          avg_rating: Number(item.rating_avg || item.avg_rating || 4.8),
+          review_count: Number(item.rating_count || item.review_count || 24),
+          view_count: Number(item.views_count || item.view_count || 120),
+          is_featured: Boolean(item.is_featured),
+          discount_percentage: item.discount_percentage ? Number(item.discount_percentage) : 0
+        };
+      });
+    } catch (err) {
+      console.warn('Backend API offline, falling back to mock catalog:', err);
       let filtered = [...INITIAL_PRODUCTS];
       if (params?.category && params.category !== 'all') {
         filtered = filtered.filter(p => p.category === params.category);
@@ -74,7 +101,8 @@ export class ApiService {
     try {
       const res = await fetch(`${BASE_URL}/catalog/categories/`);
       if (!res.ok) throw new Error('API Error');
-      return await res.json();
+      const data = await res.json();
+      return Array.isArray(data) ? data : data.results || INITIAL_CATEGORIES;
     } catch {
       return INITIAL_CATEGORIES;
     }

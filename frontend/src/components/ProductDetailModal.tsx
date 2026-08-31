@@ -20,11 +20,14 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 }) => {
   if (!product) return null;
 
-  const [selectedImage, setSelectedImage] = useState(
-    product.images.find(img => img.is_primary)?.image_url || product.images[0]?.image_url
-  );
+  const images = product?.images || [];
+  const primaryImg = (images.length > 0 ? (images.find(img => img?.is_primary)?.image_url || images[0]?.image_url) : null)
+    || (product as any)?.primary_image
+    || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&auto=format&fit=crop';
+
+  const [selectedImage, setSelectedImage] = useState(primaryImg);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(
-    product.variants[0] || { id: 1, sku: 'DEFAULT', color_name: 'Standard', size: 'M', stock_quantity: 10 }
+    product?.variants?.[0] || { id: 1, sku: 'DEFAULT', color_name: 'Standard', size: 'M', stock_quantity: 10 }
   );
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'details' | 'reviews'>('details');

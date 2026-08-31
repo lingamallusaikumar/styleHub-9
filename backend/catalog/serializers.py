@@ -56,17 +56,23 @@ class ProductListSerializer(serializers.ModelSerializer):
     category_name = serializers.ReadOnlyField(source='category.name')
     brand_name = serializers.ReadOnlyField(source='brand.name')
     primary_image = serializers.SerializerMethodField()
+    images = ProductImageSerializer(many=True, read_only=True)
+    variants = ProductVariantSerializer(many=True, read_only=True)
     current_price = serializers.ReadOnlyField()
     discount_percentage = serializers.ReadOnlyField()
+    avg_rating = serializers.ReadOnlyField(source='rating_avg')
+    review_count = serializers.ReadOnlyField(source='rating_count')
+    view_count = serializers.ReadOnlyField(source='views_count')
 
     class Meta:
         model = Product
         fields = [
-            'id', 'title', 'slug', 'category', 'category_name',
+            'id', 'title', 'slug', 'description', 'category', 'category_name',
             'brand', 'brand_name', 'gender', 'base_price',
             'sale_price', 'current_price', 'discount_percentage',
             'is_featured', 'is_trending', 'rating_avg', 'rating_count',
-            'primary_image', 'created_at'
+            'avg_rating', 'review_count', 'view_count',
+            'primary_image', 'images', 'variants', 'created_at'
         ]
 
     def get_primary_image(self, obj):
@@ -86,6 +92,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     seller_store = serializers.ReadOnlyField(source='seller.store_name')
     current_price = serializers.ReadOnlyField()
     discount_percentage = serializers.ReadOnlyField()
+    avg_rating = serializers.ReadOnlyField(source='rating_avg')
+    review_count = serializers.ReadOnlyField(source='rating_count')
+    view_count = serializers.ReadOnlyField(source='views_count')
 
     class Meta:
         model = Product
@@ -94,6 +103,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'brand', 'seller', 'seller_store', 'gender', 'tags',
             'base_price', 'sale_price', 'current_price', 'discount_percentage',
             'is_featured', 'is_trending', 'rating_avg', 'rating_count',
+            'avg_rating', 'review_count', 'view_count',
             'views_count', 'variants', 'images', 'specs',
             'created_at', 'updated_at'
         ]

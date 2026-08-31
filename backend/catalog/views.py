@@ -38,8 +38,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Product.objects.select_related('category', 'brand', 'seller').prefetch_related('images', 'variants', 'tags').all()
         
-        # Search query
-        q = self.request.query_params.get('q')
+        # Search query (supports 'search' or 'q')
+        q = self.request.query_params.get('search') or self.request.query_params.get('q')
         if q:
             queryset = queryset.filter(
                 Q(title__icontains=q) |
@@ -51,7 +51,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         # Category filter
         category = self.request.query_params.get('category')
-        if category:
+        if category and category != 'all':
             if category.isdigit():
                 queryset = queryset.filter(category_id=category)
             else:
@@ -59,7 +59,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         # Brand filter
         brand = self.request.query_params.get('brand')
-        if brand:
+        if brand and brand != 'all':
             if brand.isdigit():
                 queryset = queryset.filter(brand_id=brand)
             else:
@@ -96,8 +96,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         if size:
             queryset = queryset.filter(variants__size__iexact=size).distinct()
 
-        # Sorting
-        sort = self.request.query_params.get('sort')
+        # Sorting (supports 'sort' or 'ordering')
+        sort = self.request.query_params.get('sort') or self.request.query_params.get('ordering')
         if sort == 'price_asc':
             queryset = queryset.order_by('base_price')
         elif sort == 'price_desc':

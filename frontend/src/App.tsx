@@ -9,18 +9,25 @@ import { OrderTrackerModal } from './components/OrderTrackerModal';
 import { Dashboard } from './components/Dashboard';
 import { AuthModal } from './components/AuthModal';
 import { NotificationToast } from './components/NotificationToast';
+import { ApiPortalView } from './components/ApiPortalView';
 
 import { Product, ProductVariant, CartItem, Order, User, Category } from './types';
 import { ApiService } from './services/api';
 import { INITIAL_CATEGORIES, MOCK_NOTIFICATIONS, MOCK_ORDERS, MOCK_SELLER_PROFILE } from './data/mockData';
-import { SlidersHorizontal, Sparkles, Heart } from 'lucide-react';
+import { SlidersHorizontal, Sparkles } from 'lucide-react';
 
 export function App() {
+  const [activeView, setActiveView] = useState<'store' | 'api'>('store');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOption, setSortOption] = useState<string>('featured');
+
+  const handleSelectCategory = (slug: string) => {
+    setActiveView('store');
+    setSelectedCategory(slug);
+  };
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -72,8 +79,8 @@ export function App() {
   // Cart operations
   const handleAddToCart = (product: Product, variant?: ProductVariant, quantity: number = 1) => {
     const targetVariant = variant || product.variants[0] || { id: 1, sku: 'DEF', color_name: 'Standard', size: 'M', stock_quantity: 10 };
-    const primaryImg = product.images.find(img => img.is_primary)?.image_url || product.images[0]?.image_url;
-    const brandName = typeof product.brand === 'string' ? product.brand : product.brand.name;
+    const primaryImg = product.images?.find(img => img.is_primary)?.image_url || product.images?.[0]?.image_url || (product as any)?.primary_image;
+    const brandName = typeof product.brand === 'string' ? product.brand : (product.brand?.name || 'StyleHub');
 
     setCartItems(prev => {
       const existingIdx = prev.findIndex(item => item.variant.id === targetVariant.id);
@@ -149,7 +156,7 @@ export function App() {
       <Navbar
         categories={categories}
         selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
+        onSelectCategory={handleSelectCategory}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         cartCount={cartCount}
@@ -162,73 +169,79 @@ export function App() {
         onOpenDashboard={() => setIsDashboardOpen(true)}
         theme={theme}
         onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        activeView={activeView}
+        onToggleApiPortal={() => setActiveView(activeView === 'store' ? 'api' : 'store')}
       />
 
       {/* Main Content */}
       <main className="flex-1 pb-16">
-        
-        {/* Editorial Hero Banner */}
-        <Hero onShopNow={() => setSelectedCategory('all')} />
+        {activeView === 'api' ? (
+          <ApiPortalView onBackToStore={() => setActiveView('store')} />
+        ) : (
+          <>
+            {/* Editorial Hero Banner */}
+            <Hero onShopNow={() => setSelectedCategory('all')} />
 
-        {/* Catalog Section Header & Filter Controls */}
-        <section className="max-w-7xl mx-auto px-4 lg:px-8 mt-12 mb-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="badge-gold">AUTUMN EDIT</span>
-                <span className="text-xs text-[var(--text-muted)] font-semibold">{products.length} Products</span>
+            {/* Catalog Section Header & Filter Controls */}
+            <section className="max-w-7xl mx-auto px-4 lg:px-8 mt-12 mb-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="badge-gold">AUTUMN EDIT</span>
+                    <span className="text-xs text-[var(--text-muted)] font-semibold">{products.length} Products</span>
+                  </div>
+                  <h2 className="text-3xl font-extrabold font-['Outfit']">
+                    {selectedCategory === 'all' ? 'All Collections' : categories.find(c => c.slug === selectedCategory)?.name || 'Curated Selection'}
+                  </h2>
+                </div>
+
+                {/* Sort & Filter Controls */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full px-4 py-2 text-xs">
+                    <SlidersHorizontal className="w-4 h-4 text-[var(--accent-gold)]" />
+                    <span className="font-bold text-[var(--text-muted)] hidden sm:inline">SORT BY:</span>
+                    <select
+                      value={sortOption}
+                      onChange={(e) => setSortOption(e.target.value)}
+                      className="bg-transparent text-[var(--text-primary)] font-bold focus:outline-none cursor-pointer"
+                    >
+                      <option value="featured" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Featured</option>
+                      <option value="price_asc" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Price: Low to High</option>
+                      <option value="price_desc" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Price: High to Low</option>
+                      <option value="rating" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Highest Rated</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-3xl font-extrabold font-['Outfit']">
-                {selectedCategory === 'all' ? 'All Collections' : categories.find(c => c.slug === selectedCategory)?.name || 'Curated Selection'}
-              </h2>
-            </div>
 
-            {/* Sort & Filter Controls */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full px-4 py-2 text-xs">
-                <SlidersHorizontal className="w-4 h-4 text-[var(--accent-gold)]" />
-                <span className="font-bold text-[var(--text-muted)] hidden sm:inline">SORT BY:</span>
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className="bg-transparent text-[var(--text-primary)] font-bold focus:outline-none cursor-pointer"
-                >
-                  <option value="featured" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Featured</option>
-                  <option value="price_asc" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Price: Low to High</option>
-                  <option value="price_desc" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Price: High to Low</option>
-                  <option value="rating" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">Highest Rated</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Product Grid */}
-          {loading ? (
-            <div className="py-24 text-center text-[var(--text-muted)] font-bold animate-pulse">
-              Curating luxury catalog...
-            </div>
-          ) : products.length === 0 ? (
-            <div className="py-24 text-center space-y-3">
-              <Sparkles className="w-12 h-12 mx-auto text-[var(--accent-gold)] opacity-40" />
-              <h3 className="font-bold text-lg">No products found</h3>
-              <p className="text-xs text-[var(--text-muted)]">Try adjusting your search keywords or category filters.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-              {products.map(product => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onQuickView={(p) => setQuickViewProduct(p)}
-                  onAddToCart={(p) => handleAddToCart(p, p.variants[0], 1)}
-                  isWishlisted={wishlist.some(w => w.id === product.id)}
-                  onToggleWishlist={handleToggleWishlist}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
+              {/* Product Grid */}
+              {loading ? (
+                <div className="py-24 text-center text-[var(--text-muted)] font-bold animate-pulse">
+                  Curating luxury catalog...
+                </div>
+              ) : products.length === 0 ? (
+                <div className="py-24 text-center space-y-3">
+                  <Sparkles className="w-12 h-12 mx-auto text-[var(--accent-gold)] opacity-40" />
+                  <h3 className="font-bold text-lg">No products found</h3>
+                  <p className="text-xs text-[var(--text-muted)]">Try adjusting your search keywords or category filters.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+                  {products.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onQuickView={(p) => setQuickViewProduct(p)}
+                      onAddToCart={(p) => handleAddToCart(p, p.variants[0], 1)}
+                      isWishlisted={wishlist.some(w => w.id === product.id)}
+                      onToggleWishlist={handleToggleWishlist}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          </>
+        )}
       </main>
 
       {/* Footer */}

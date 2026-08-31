@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Heart, Search, Bell, User as UserIcon, Moon, Sun, Sparkles, SlidersHorizontal } from 'lucide-react';
+import { ShoppingBag, Heart, Search, Bell, User as UserIcon, Moon, Sun, Sparkles, SlidersHorizontal, Zap } from 'lucide-react';
 import { Category, NotificationItem } from '../types';
 
 interface NavbarProps {
@@ -18,6 +18,8 @@ interface NavbarProps {
   onOpenDashboard: () => void;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  activeView: 'store' | 'api';
+  onToggleApiPortal: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -36,6 +38,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenDashboard,
   theme,
   onToggleTheme,
+  activeView,
+  onToggleApiPortal,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const unreadCount = notifications.filter(n => !n.is_read).length;
@@ -58,14 +62,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Categories Desktop */}
+        {/* Categories Desktop & API Portal Toggle */}
         <nav className="hidden md:flex items-center gap-1 bg-[var(--bg-surface)] p-1.5 rounded-full border border-[var(--border-subtle)]">
           {categories.map(cat => (
             <button
               key={cat.id}
-              onClick={() => onSelectCategory(cat.slug)}
+              onClick={() => {
+                if (activeView === 'api') onToggleApiPortal();
+                onSelectCategory(cat.slug);
+              }}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                selectedCategory === cat.slug
+                activeView === 'store' && selectedCategory === cat.slug
                   ? 'bg-[var(--accent-gold-gradient)] text-black font-bold shadow-md'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-bg)]'
               }`}
@@ -73,6 +80,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               {cat.name}
             </button>
           ))}
+
+          <button
+            onClick={onToggleApiPortal}
+            className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition-all flex items-center gap-1 ${
+              activeView === 'api'
+                ? 'bg-amber-400 text-black shadow-lg scale-105'
+                : 'text-[var(--accent-gold)] border border-[var(--accent-gold-glow)] hover:bg-[var(--accent-gold-glow)]'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5" />
+            API Portal
+          </button>
         </nav>
 
         {/* Search & Actions */}
