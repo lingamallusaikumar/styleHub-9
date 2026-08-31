@@ -11,6 +11,12 @@ import { AuthModal } from './components/AuthModal';
 import { NotificationToast } from './components/NotificationToast';
 import { ApiPortalView } from './components/ApiPortalView';
 
+import { SmartRecommendationEngine } from './components/SmartRecommendationEngine';
+import { VendorErpDashboard } from './components/VendorErpDashboard';
+import { VipLoyaltyProgram } from './components/VipLoyaltyProgram';
+import { SizeFitPredictor } from './components/SizeFitPredictor';
+import { FulfillmentTracker } from './components/FulfillmentTracker';
+
 import { Product, ProductVariant, CartItem, Order, User, Category } from './types';
 import { ApiService } from './services/api';
 import { INITIAL_CATEGORIES, MOCK_NOTIFICATIONS, MOCK_ORDERS, MOCK_SELLER_PROFILE } from './data/mockData';
@@ -19,6 +25,7 @@ import { SlidersHorizontal, Sparkles } from 'lucide-react';
 export function App() {
   const [activeView, setActiveView] = useState<'store' | 'api'>('store');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [currency, setCurrency] = useState<string>('USD');
   const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -37,6 +44,8 @@ export function App() {
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState<boolean>(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
+  const [isVendorErpOpen, setIsVendorErpOpen] = useState<boolean>(false);
+  const [isVipLoyaltyOpen, setIsVipLoyaltyOpen] = useState<boolean>(false);
   const [appliedCoupon, setAppliedCoupon] = useState<string>('');
   const [discountAmount, setDiscountAmount] = useState<number>(0);
 
@@ -171,6 +180,10 @@ export function App() {
         onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         activeView={activeView}
         onToggleApiPortal={() => setActiveView(activeView === 'store' ? 'api' : 'store')}
+        currency={currency}
+        onCurrencyChange={setCurrency}
+        onOpenVendorErp={() => setIsVendorErpOpen(true)}
+        onOpenVipLoyalty={() => setIsVipLoyaltyOpen(true)}
       />
 
       {/* Main Content */}
@@ -239,6 +252,15 @@ export function App() {
                   ))}
                 </div>
               )}
+
+              {/* AI Smart Recommendation Engine */}
+              <SmartRecommendationEngine
+                allProducts={products}
+                onSelectProduct={(p) => setQuickViewProduct(p)}
+                onAddToCart={(p) => handleAddToCart(p, p.variants[0], 1)}
+                onToggleWishlist={handleToggleWishlist}
+                wishlist={wishlist}
+              />
             </section>
           </>
         )}
@@ -268,8 +290,8 @@ export function App() {
             <h4 className="font-bold text-xs uppercase tracking-wider text-[var(--accent-gold)] mb-3">Client Services</h4>
             <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
               <li><button onClick={() => setIsDashboardOpen(true)} className="hover:text-white">Order Tracking</button></li>
-              <li><a href="#" className="hover:text-white">Doorstep Returns</a></li>
-              <li><a href="#" className="hover:text-white">Bespoke Concierge</a></li>
+              <li><button onClick={() => setIsVipLoyaltyOpen(true)} className="hover:text-white">VIP Loyalty Program</button></li>
+              <li><button onClick={() => setIsVendorErpOpen(true)} className="hover:text-white font-bold text-[var(--accent-gold)]">Merchant ERP Portal</button></li>
               <li><a href="#" className="hover:text-white">Authenticity Guarantee</a></li>
             </ul>
           </div>
@@ -334,6 +356,31 @@ export function App() {
         onClose={() => setActiveOrderTracker(null)}
         onRequestReturn={(orderNum) => setToastMessage(`Return requested for Order #${orderNum}.`)}
       />
+
+      {isVendorErpOpen && (
+        <VendorErpDashboard
+          sellerProfile={MOCK_SELLER_PROFILE}
+          products={products}
+          onClose={() => setIsVendorErpOpen(false)}
+        />
+      )}
+
+      {isVipLoyaltyOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <VipLoyaltyProgram
+              user={user}
+              onRedeemReward={(code) => setToastMessage(`Voucher "${code}" added to your account rewards.`)}
+            />
+            <button
+              onClick={() => setIsVipLoyaltyOpen(false)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {isDashboardOpen && user && (
         <Dashboard

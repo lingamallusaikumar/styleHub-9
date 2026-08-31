@@ -50,6 +50,8 @@ export interface Product {
   review_count: number;
   view_count: number;
   is_featured: boolean;
+  is_trending?: boolean;
+  gender?: string;
   discount_percentage?: number;
 }
 
@@ -123,6 +125,7 @@ export interface Order {
   total_amount: number;
   shipping_address_data: ShippingAddress;
   coupon_code?: string;
+  tracking_number?: string;
   created_at: string;
   items: OrderItem[];
   shipment?: ShipmentTracking;

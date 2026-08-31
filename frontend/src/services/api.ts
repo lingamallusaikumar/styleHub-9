@@ -189,4 +189,22 @@ export class ApiService {
       return MOCK_SELLER_PROFILE;
     }
   }
+
+  // Multi-Currency Converter
+  static formatCurrency(amountUsd: number, currency: string = 'USD'): string {
+    const rates: Record<string, { rate: number; symbol: string }> = {
+      USD: { rate: 1.0, symbol: '$' },
+      EUR: { rate: 0.92, symbol: '€' },
+      GBP: { rate: 0.79, symbol: '£' },
+      JPY: { rate: 154.5, symbol: '¥' },
+      CAD: { rate: 1.36, symbol: 'CA$' },
+      AUD: { rate: 1.52, symbol: 'A$' }
+    };
+    const c = rates[currency] || rates.USD;
+    const converted = amountUsd * c.rate;
+    if (currency === 'JPY') {
+      return `${c.symbol}${Math.round(converted).toLocaleString()}`;
+    }
+    return `${c.symbol}${converted.toFixed(2)}`;
+  }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Heart, Search, Bell, User as UserIcon, Moon, Sun, Sparkles, SlidersHorizontal, Zap } from 'lucide-react';
+import { ShoppingBag, Heart, Search, Bell, User as UserIcon, Moon, Sun, Sparkles, SlidersHorizontal, Zap, Crown, Layers, Globe } from 'lucide-react';
 import { Category, NotificationItem } from '../types';
 
 interface NavbarProps {
@@ -20,6 +20,10 @@ interface NavbarProps {
   onToggleTheme: () => void;
   activeView: 'store' | 'api';
   onToggleApiPortal: () => void;
+  currency: string;
+  onCurrencyChange: (c: string) => void;
+  onOpenVendorErp: () => void;
+  onOpenVipLoyalty: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -40,6 +44,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleTheme,
   activeView,
   onToggleApiPortal,
+  currency,
+  onCurrencyChange,
+  onOpenVendorErp,
+  onOpenVipLoyalty,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const unreadCount = notifications.filter(n => !n.is_read).length;
@@ -96,6 +104,41 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Search & Actions */}
         <div className="flex items-center gap-3">
+          {/* Currency Selector */}
+          <div className="flex items-center gap-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full px-3 py-1 text-xs">
+            <Globe className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
+            <select
+              value={currency}
+              onChange={(e) => onCurrencyChange(e.target.value)}
+              className="bg-transparent text-[var(--text-primary)] font-bold focus:outline-none cursor-pointer text-xs"
+            >
+              <option value="USD" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">USD ($)</option>
+              <option value="EUR" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">EUR (€)</option>
+              <option value="GBP" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">GBP (£)</option>
+              <option value="JPY" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">JPY (¥)</option>
+              <option value="CAD" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">CAD (CA$)</option>
+              <option value="AUD" className="bg-[var(--bg-surface)] text-[var(--text-primary)]">AUD (A$)</option>
+            </select>
+          </div>
+
+          {/* Vendor ERP Button */}
+          <button
+            onClick={onOpenVendorErp}
+            className="p-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors hidden xl:flex items-center gap-1"
+            title="Merchant ERP Dashboard"
+          >
+            <Layers className="w-4 h-4 text-[var(--accent-gold)]" />
+          </button>
+
+          {/* VIP Loyalty Button */}
+          <button
+            onClick={onOpenVipLoyalty}
+            className="p-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors hidden xl:flex items-center gap-1"
+            title="VIP Loyalty Program"
+          >
+            <Crown className="w-4 h-4 text-amber-400" />
+          </button>
+
           {/* Live Search Input */}
           <div className="relative hidden sm:block w-48 md:w-64">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
