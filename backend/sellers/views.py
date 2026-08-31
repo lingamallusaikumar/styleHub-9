@@ -27,7 +27,7 @@ class PublicSellerStoreView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
 
 
-class AdminSellerListView(generics.ListUpdateAPIView):
+class AdminSellerListView(generics.ListAPIView):
     queryset = SellerProfile.objects.all()
     serializer_class = SellerProfileSerializer
     permission_classes = [permissions.IsAdminUser]

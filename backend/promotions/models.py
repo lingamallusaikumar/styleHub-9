@@ -35,17 +35,19 @@ class Coupon(models.Model):
         return True, "Valid"
 
     def calculate_discount(self, subtotal):
-        if subtotal < self.min_spend:
+        from decimal import Decimal
+        subtotal_dec = Decimal(str(subtotal))
+        if subtotal_dec < self.min_spend:
             return 0.0, f"Minimum spend of ${self.min_spend} required."
         
         if self.discount_type == 'PERCENTAGE':
-            discount = (subtotal * self.discount_value) / 100
+            discount = (subtotal_dec * self.discount_value) / Decimal('100')
             if self.max_discount and discount > self.max_discount:
                 discount = self.max_discount
         else:
             discount = self.discount_value
-            if discount > subtotal:
-                discount = subtotal
+            if discount > subtotal_dec:
+                discount = subtotal_dec
 
         return round(float(discount), 2), "Discount applied successfully."
 
